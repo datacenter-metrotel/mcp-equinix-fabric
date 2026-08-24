@@ -1,0 +1,19 @@
+services:
+  equinix-mcp:
+    build: .
+    image: equinix-mcp:latest
+    container_name: equinix-mcp
+    ports:
+      - "8081:8080"
+    environment:
+      EQUINIX_CLIENT_ID: ${EQUINIX_CLIENT_ID}
+      EQUINIX_CLIENT_SECRET: ${EQUINIX_CLIENT_SECRET}
+      MCP_SERVER_API_KEY: ${MCP_SERVER_API_KEY}
+      MCP_HOST_IP: ${MCP_HOST_IP:-172.18.208.166}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(3); s.connect(('127.0.0.1',8080)); s.close()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

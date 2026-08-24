@@ -1,0 +1,55 @@
+services:
+  equinix-mcp:
+    image: equinix-mcp:0.2.0
+    # Swarm monta cada secret como archivo en /run/secrets/<nombre>.
+    # El entrypoint los lee y los exporta como env vars antes de arrancar la app,
+    # sin modificar la imagen ni el código Python.
+    entrypoint:
+      - sh
+      - -c
+      - |
+        set -e
+        export EQUINIX_CLIENT_ID="$$(cat /run/secrets/equinix_client_id)"
+        export EQUINIX_CLIENT_SECRET="$$(cat /run/secrets/equinix_client_secret)"
+        export MCP_SERVER_API_KEY="$$(cat /run/secrets/mcp_server_api_key)"
+        exec uv run --no-project /app/equinix_mcp_server.py
+    ports:
+      - "8081:8080"
+    secrets:
+      - equinix_client_id
+      - equinix_client_secret
+      - mcp_server_api_key
+    environment:
+      MCP_HOST: "0.0.0.0"
+      MCP_PORT: "8080"
+      MCP_HOST_IP: "${MCP_HOST_IP:-172.18.208.166}"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.05"
+          memory: 128M
+      update_config:
+        parallelism: 1
+        order: start-first
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(3); s.connect(('127.0.0.1',8080)); s.close()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+secrets:
+  equinix_client_id:
+    external: true
+  equinix_client_secret:
+    external: true
+  mcp_server_api_key:
+    external: true

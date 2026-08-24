@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: equinix-mcp
+  namespace: default
+  labels:
+    app: equinix-mcp
+spec:
+  type: ClusterIP
+  selector:
+    app: equinix-mcp
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP

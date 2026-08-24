@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: equinix-mcp
+  namespace: default
+  labels:
+    app: equinix-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: equinix-mcp
+  template:
+    metadata:
+      labels:
+        app: equinix-mcp
+    spec:
+      containers:
+        - name: equinix-mcp
+          image: equinix-mcp:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: MCP_PORT
+              value: "8080"
+            - name: MCP_HOST
+              value: "0.0.0.0"
+            - name: MCP_HOST_IP
+              value: "equinix-mcp.default.svc.cluster.local"
+          envFrom:
+            - secretRef:
+                name: equinix-mcp-secrets
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: false
