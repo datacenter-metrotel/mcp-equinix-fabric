@@ -5,6 +5,8 @@ como microservicio Docker. Expone las operaciones de la API de Fabric v4
 (conexiones, puertos, cloud routers, service profiles, metros) a cualquier
 cliente MCP compatible — Claude Desktop, Claude Code, Cursor, etc.
 
+**Imagen en Docker Hub**: [`metrotel/mcp-equinix-fabric`](https://hub.docker.com/r/metrotel/mcp-equinix-fabric)
+
 - 🐳 Imagen Docker portable (~86 MB comprimida, sin secretos embebidos)
 - 🔐 Credenciales por env vars / Swarm secrets / Kubernetes Secrets
 - 🌐 Transporte Streamable HTTP + SSE con Bearer auth
@@ -36,7 +38,20 @@ cliente MCP compatible — Claude Desktop, Claude Code, Cursor, etc.
 - Kubernetes ≥ 1.24 (para deploy en cluster)
 - Credenciales OAuth2 de Equinix Console (Client Credentials flow)
 
-## Quickstart (Docker Compose)
+## Quickstart
+
+### Opción A — `docker run` sin clonar el repo
+
+```bash
+docker run -d --name equinix-mcp -p 8081:8080 \
+  -e EQUINIX_CLIENT_ID='...' \
+  -e EQUINIX_CLIENT_SECRET='...' \
+  -e MCP_SERVER_API_KEY='emcp-...' \
+  --restart unless-stopped \
+  metrotel/mcp-equinix-fabric:0.2.0
+```
+
+### Opción B — Docker Compose (clonando el repo)
 
 ```bash
 # 1) Cloná el repo
@@ -46,10 +61,10 @@ cd mcp-equinix-fabric
 # 2) Configurá credenciales
 cp .env.example .env
 chmod 600 .env
-# editá .env con tus valores reales (Client ID/Secret de Equinix + Bearer para el server)
+# editá .env con tus valores reales
 
-# 3) Build + up
-docker compose up -d --build
+# 3) Up (pull automático desde Docker Hub, no requiere build local)
+docker compose up -d
 
 # 4) Verificar
 docker compose ps
@@ -60,6 +75,9 @@ curl -sS -L -X POST http://127.0.0.1:8081/mcp/ \
   -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
   --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1"}}}'
 ```
+
+Si querés buildear la imagen desde el código (en vez de usar Docker Hub),
+descomentá `build: .` en `docker-compose.yml` y corré `docker compose up -d --build`.
 
 ## Configurar Claude Desktop
 
@@ -151,15 +169,18 @@ kubectl apply -k k8s/
 
 **Kubernetes**: `kubectl create secret … --dry-run=client -o yaml | kubectl apply -f -` + `kubectl rollout restart deployment/equinix-mcp`.
 
-## Rebuild y publicar imagen
+## Rebuild y publicar imagen (mantenedores)
 
 ```bash
-docker build -t equinix-mcp:0.2.1 -t equinix-mcp:latest .
+docker build -t metrotel/mcp-equinix-fabric:0.2.1 -t metrotel/mcp-equinix-fabric:latest .
 
-# Push a registry (ejemplo Docker Hub)
-docker tag equinix-mcp:0.2.1 <user>/mcp-equinix-fabric:0.2.1
-docker push <user>/mcp-equinix-fabric:0.2.1
+docker login -u metrotel
+docker push metrotel/mcp-equinix-fabric:0.2.1
+docker push metrotel/mcp-equinix-fabric:latest
 ```
+
+Después bumpear el tag en `docker-compose.yml`, `swarm/docker-compose.swarm.yml`
+y `k8s/deployment.yaml`, y crear tag git de release (`v0.2.1`).
 
 ## Seguridad
 

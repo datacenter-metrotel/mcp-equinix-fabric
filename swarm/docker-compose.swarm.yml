@@ -1,6 +1,6 @@
 services:
   equinix-mcp:
-    image: equinix-mcp:0.2.0
+    image: metrotel/mcp-equinix-fabric:0.2.0
     # Swarm monta cada secret como archivo en /run/secrets/<nombre>.
     # El entrypoint los lee y los exporta como env vars antes de arrancar la app,
     # sin modificar la imagen ni el código Python.

@@ -1,7 +1,8 @@
 services:
   equinix-mcp:
-    build: .
-    image: equinix-mcp:latest
+    image: metrotel/mcp-equinix-fabric:0.2.0
+    # Para desarrollo local (rebuild desde código), descomentá build:
+    # build: .
     container_name: equinix-mcp
     ports:
       - "8081:8080"
