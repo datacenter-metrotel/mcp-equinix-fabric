@@ -47,7 +47,7 @@ docker stack deploy -c docker-compose.swarm.yml equinix
 ```bash
 docker stack ps equinix
 docker service logs -f equinix_equinix-mcp
-curl -H "Authorization: Bearer <MCP_SERVER_API_KEY>" http://172.18.208.166:8081/mcp/ \
+curl -H "Authorization: Bearer <MCP_SERVER_API_KEY>" http://172.18.208.166:8081/mcp \
   -X POST -H 'Accept: application/json, text/event-stream' \
   --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"qa","version":"1"}}}'
 ```

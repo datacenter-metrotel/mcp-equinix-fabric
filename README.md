@@ -70,7 +70,7 @@ docker compose up -d
 docker compose ps
 # STATUS: Up X seconds (healthy)
 
-curl -sS -L -X POST http://127.0.0.1:8081/mcp/ \
+curl -sS -L -X POST http://127.0.0.1:8081/mcp \
   -H "Authorization: Bearer $(grep MCP_SERVER_API_KEY .env | cut -d= -f2)" \
   -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
   --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1"}}}'
@@ -90,7 +90,7 @@ Agregá al `claude_desktop_config.json`:
       "command": "npx",
       "args": [
         "-y", "mcp-remote",
-        "http://<HOST_IP>:8081/mcp/",
+        "http://<HOST_IP>:8081/mcp",
         "--allow-http",
         "--transport", "http-only",
         "--header", "Authorization:Bearer <MCP_SERVER_API_KEY>"
